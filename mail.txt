@@ -1,0 +1,49 @@
+Hi test,
+
+We received a request from m.im.dep-appoint.static.019.ippool.cyut.edu.tw[120.110.7.19].
+Here is the address and your unique ID.
+Please do not share these information with others.
+Thanks!
+
+URL : http://www.consortium.ri.cmu.edu/data/ck/
+ID : 37268335dd6931045bdcdf92623ff819a64244b53d0e746d438797349d4da578kx8Nun8tk3pjOUHQvTuggMCZjeg
+Password : n/E8w/djzhfxhxz//KD7JI3g1QI
+
+After login you have access to the Cohn-Kanade Database and the Extended Cohn-Kanade Database (CK+) and corresponding metadata: 
+
+Cohn-Kanade (CK) database: 
+
+Image Data:
+Cohn-kanade.tgz (1.7gb): zipped file of image data in png format 
+-585 directories (subject + session)
+-97 subject directories
+-8795 image files
+
+Metadata:
+1. Cohn-Kanade Database FACS codes updated based on 2002 manual revised.xls
+2. ReadMeCohnKanadeDatabase_website.doc
+3. Consent-for-publication.doc
+4. Translating AU Scores Into Emotion Terms.doc
+
+Publication:
+Kanade_Cohn_Tian_2000.pdf
+
+------------------------------------------------------- 
+
+Extended Cohn-Kanade (CK+) database:
+
+Image Data:
+extended-cohn-kanade-images.zip (1.5gb): zipped file of image data in png format 
+-719 (subject + session)
+-123 subject directories
+-10558 image files
+
+Metadata:
+1. FACS Codes: FACS_labels.zip 
+2. ReadMeCohnKanadeDatabase_website.doc
+3. Consent-for-publication.doc
+4. Emotion Labels: Emotion_labels.zip
+5. AAM data: Landmarks.zip
+
+Publication:
+CVPR2010_CK.pdf
