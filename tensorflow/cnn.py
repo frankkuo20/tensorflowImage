@@ -161,7 +161,7 @@ with tf.Session() as sess:
     threads_test = tf.train.start_queue_runners(coord=coord_test)
     test_imgs, test_labels = sess.run([test_img_batch, test_label_batch])
     # 预测阶段，keep取值均为1
-    acc = sess.run(accuracy, feed_dict={x: test_imgs, y_: labels, keep_prob: 1.0})
+    acc = sess.run(accuracy, feed_dict={x: test_imgs, y_: test_labels, keep_prob: 1.0})
     print("predict accuracy is %.2f" % acc)
     coord_test.request_stop()
     coord_test.join(threads_test)
