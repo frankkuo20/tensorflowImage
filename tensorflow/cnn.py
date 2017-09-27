@@ -58,11 +58,14 @@ def max_pool_2x2(x):
     return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1],
                           padding='SAME')
 
-x = tf.placeholder(tf.float32, [None, IMG_SIZE, IMG_SIZE, 1])  # 128*128
-y_ = tf.placeholder(tf.float32, [None, LABEL_CNT])  # right answer
+# with tf.name_scope('Inputs'):
+x = tf.placeholder(tf.float32, [None, IMG_SIZE, IMG_SIZE, 1], name='x')  # 128*128
+y_ = tf.placeholder(tf.float32, [None, LABEL_CNT], name='y_')  # right answer
 
 # one
+
 W_conv = weight_variable([5, 5, 1, 32])
+
 b_conv = bias_variable([32])
 h_conv = tf.nn.relu(conv2d(x, W_conv) + b_conv)
 h_pool = max_pool_2x2(h_conv)
@@ -73,7 +76,7 @@ b_conv2 = bias_variable([64])
 h_conv2 = tf.nn.relu(conv2d(h_pool, W_conv2) + b_conv2)
 h_pool2 = max_pool_2x2(h_conv2)
 
-# final
+# final 128/2/2 = 32
 W_fc = weight_variable([32*32*64, 1024])
 b_fc = bias_variable([1024])
 
@@ -88,12 +91,12 @@ b_fc2 = bias_variable([4])
 
 y = tf.matmul(h_fc_drop, W_fc2) + b_fc2
 
-
+# with tf.name_scope('Loss'):
 cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y, labels=y_))
 
 # 梯度下降法gradient descent algorithm
 # train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
-
+# with tf.name_scope('Trains'):
 train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
 correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
@@ -103,17 +106,21 @@ init = tf.global_variables_initializer()
 
 disp_step = 5
 save_step = 100
-max_step = 1000  # 最大迭代次数
+max_step = 200  # 最大迭代次数
 step = 0
 saver = tf.train.Saver()  # 用来保存模型的
 epoch = 5
 
+
 with tf.Session() as sess:
+    # tensorboard
+    writer = tf.summary.FileWriter("logs/", graph=sess.graph)
+
     coord = tf.train.Coordinator()
     sess.run(init)
 
     # start_queue_runnes读取数据，具体用法参见官网
-    threads = tf.train.start_queue_runners(coord=coord)
+    threads = tf.train.start_queue_runners(sess=sess, coord=coord)
     try:
         # 获取训练数据成功，并且没有到达最大训练次数
         while not coord.should_stop() and step < max_step:
@@ -143,18 +150,18 @@ with tf.Session() as sess:
 
 print("training is done")
 
-#
-# test_img_batch, test_label_batch = input_pipeline(["./0_train/test.bin"], 5)
-# with tf.Session() as sess:
-#     # 加载模型。模型的文件名称看下本地情况
-#     print('./cnn_train/graph.ckpt-{}'.format(step))
-#     saver.restore(sess, './cnn_train/graph.ckpt-{}'.format(step))
-#
-#     coord_test = tf.train.Coordinator()
-#     threads_test = tf.train.start_queue_runners(coord=coord_test)
-#     test_imgs, test_labels = sess.run([test_img_batch, test_label_batch])
-#     # 预测阶段，keep取值均为1
-#     acc = sess.run(accuracy, feed_dict={x: imgs, y_: labels, keep_prob: 1.0})
-#     print("predict accuracy is %.2f" % acc)
-#     coord_test.request_stop()
-#     coord_test.join(threads_test)
+
+test_img_batch, test_label_batch = input_pipeline(["./0_train/test.bin"], 5)
+with tf.Session() as sess:
+    # 加载模型。模型的文件名称看下本地情况
+    print('./cnn_train/graph.ckpt-{}'.format(step))
+    saver.restore(sess, './cnn_train/graph.ckpt-{}'.format(step))
+
+    coord_test = tf.train.Coordinator()
+    threads_test = tf.train.start_queue_runners(coord=coord_test)
+    test_imgs, test_labels = sess.run([test_img_batch, test_label_batch])
+    # 预测阶段，keep取值均为1
+    acc = sess.run(accuracy, feed_dict={x: test_imgs, y_: labels, keep_prob: 1.0})
+    print("predict accuracy is %.2f" % acc)
+    coord_test.request_stop()
+    coord_test.join(threads_test)
