@@ -1,11 +1,13 @@
 import glob
-
+import os
 import cv2
 import tensorflow as tf
-from constants import EMOTIONS
-import os
+from tensorflow2.constants import EMOTIONS
+# from tensorflow2.cnn import y, x, keep_prob
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+IMG_SIZE = 128  # 图像大小
+LABEL_CNT = 3  # 标签类别的数量
 
 
 def weight_variable(shape):
@@ -25,19 +27,24 @@ def max_pool_2x2(x):
                           padding='SAME')
 
 
+
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+max_step = 200
+
 def getPredNum(image):
     im_raw = image.tobytes()
     img = tf.decode_raw(im_raw, tf.uint8)
     img = tf.reshape(img, [128, 128, 1])
     image = tf.cast(img, tf.float32) * (1. / 255) - 0.5  # normalize
 
-    IMG_SIZE = 128
-    LABEL_CNT = 4
     x = tf.placeholder(tf.float32, [None, IMG_SIZE, IMG_SIZE, 1])  # 128*128
     y_ = tf.placeholder(tf.float32, [None, LABEL_CNT])  # right answer
 
     # one
     W_conv = weight_variable([5, 5, 1, 32])
+
     b_conv = bias_variable([32])
     h_conv = tf.nn.relu(conv2d(x, W_conv) + b_conv)
     h_pool = max_pool_2x2(h_conv)
@@ -48,7 +55,7 @@ def getPredNum(image):
     h_conv2 = tf.nn.relu(conv2d(h_pool, W_conv2) + b_conv2)
     h_pool2 = max_pool_2x2(h_conv2)
 
-    # final
+    # final 128/2/2 = 32
     W_fc = weight_variable([32 * 32 * 64, 1024])
     b_fc = bias_variable([1024])
 
@@ -58,19 +65,26 @@ def getPredNum(image):
     keep_prob = tf.placeholder(tf.float32)
     h_fc_drop = tf.nn.dropout(h_fc, keep_prob)
 
-    W_fc2 = weight_variable([1024, 4])
-    b_fc2 = bias_variable([4])
+    W_fc2 = weight_variable([1024, LABEL_CNT])
+    b_fc2 = bias_variable([LABEL_CNT])
 
     y = tf.matmul(h_fc_drop, W_fc2) + b_fc2
+
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y, labels=y_))
+
+    train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+
+    correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 
     sess = tf.Session()
     saver = tf.train.Saver()
-    tf.reset_default_graph()
 
-    saver.restore(sess, './final_train/graph.ckpt-{}'.format(1000))
-    image = sess.run(image)
-    result = sess.run(y, feed_dict={x: [image], keep_prob: 1.0})
+    tf.reset_default_graph()
+    saver.restore(sess, './cnn_train/graph.ckpt-{}'.format(max_step))
+    image = sess.run([image])
+    result = sess.run(y, feed_dict={x: image, keep_prob: 1.0})
     resultNum = result.argmax()
     return resultNum
 
@@ -89,13 +103,12 @@ for imagePath in imagePaths:
                                          flags=cv2.CASCADE_SCALE_IMAGE)
     font = cv2.FONT_HERSHEY_SIMPLEX
 
-    for (x, y, w, h) in faces:
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        grayCut = gray[y:y + h, x:x + w]
+    for (x2, y2, w2, h2) in faces:
+        cv2.rectangle(frame, (x2, y2), (x2 + w2, y2 + h2), (0, 255, 0), 2)
+        grayCut = gray[y2:y2 + h2, x2:x2 + w2]
         image = cv2.resize(grayCut, (128, 128))
 
         predNum = getPredNum(image)
-        print(predNum)
         text = EMOTIONS[predNum]
         print(imagePath)
         print(text)

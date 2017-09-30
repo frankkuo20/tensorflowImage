@@ -1,7 +1,7 @@
 import os
 
 import tensorflow as tf
-from constants import EMOTIONS
+from tensorflow.constants import EMOTIONS
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
