@@ -1,9 +1,6 @@
-import glob
-import os
-import cv2
 import tensorflow as tf
-from tensorflow2.constants import EMOTIONS
-
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 IMG_SIZE = 128  # 图像大小
 LABEL_CNT = 3  # 标签类别的数量
@@ -26,13 +23,15 @@ def max_pool_2x2(x):
                           padding='SAME')
 
 
-
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
 max_step = 200
 
-
 def getPredNum(image):
+    result = getPredList(image)
+    resultNum = result.argmax()
+    return resultNum
+
+
+def getPredList(image):
     im_raw = image.tobytes()
     img = tf.decode_raw(im_raw, tf.uint8)
     img = tf.reshape(img, [128, 128, 1])
@@ -76,7 +75,6 @@ def getPredNum(image):
     correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-
     sess = tf.Session()
     saver = tf.train.Saver()
 
@@ -84,42 +82,4 @@ def getPredNum(image):
     saver.restore(sess, './cnn_train/graph.ckpt-{}'.format(max_step))
     image = sess.run([image])
     result = sess.run(y, feed_dict={x: image, keep_prob: 1.0})
-    resultNum = result.argmax()
-    return resultNum
-
-IMAGE_PATH = '../dataset2/*'
-
-faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
-
-imagePaths = glob.glob(IMAGE_PATH)
-
-for imagePath in imagePaths:
-
-    image = cv2.imread(imagePath)
-    frame = image
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = faceCascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=10, minSize=(5, 5),
-                                         flags=cv2.CASCADE_SCALE_IMAGE)
-    font = cv2.FONT_HERSHEY_SIMPLEX
-
-    for (x2, y2, w2, h2) in faces:
-        cv2.rectangle(frame, (x2, y2), (x2 + w2, y2 + h2), (0, 255, 0), 2)
-        grayCut = gray[y2:y2 + h2, x2:x2 + w2]
-        image = cv2.resize(grayCut, (128, 128))
-
-        predNum = getPredNum(image)
-        text = EMOTIONS[predNum]
-        print(imagePath)
-        print(text)
-
-
-
-
-
-
-
-
-
-
-
-
+    return result
