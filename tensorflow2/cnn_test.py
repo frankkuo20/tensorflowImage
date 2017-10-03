@@ -1,9 +1,15 @@
 import tensorflow as tf
+
+from tensorflow2.cnn import CnnObj
 from tensorflow2.constants import input_pipeline
-from tensorflow2.cnn import x, y_, keep_prob, accuracy
+
+cnnObj = CnnObj()
+x = cnnObj.x
+y_ = cnnObj.y_
+keep_prob = cnnObj.keep_prob
 
 
-test_img_batch, test_label_batch = input_pipeline(["./binData/test.bin"], 50)
+test_img_batch, test_label_batch = input_pipeline(["./binData/test.bin"], 200)
 
 saver = tf.train.Saver()
 max_step = 200

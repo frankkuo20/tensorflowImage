@@ -25,46 +25,56 @@ def max_pool_2x2(x):
                           padding='SAME')
 
 
-x = tf.placeholder(tf.float32, [None, IMG_SIZE, IMG_SIZE, 1])  # 128*128
-y_ = tf.placeholder(tf.float32, [None, LABEL_CNT])  # right answer
+class CnnObj:
+    def __init__(self):
 
-# one
-W_conv = weight_variable([5, 5, 1, 32])
+        x = tf.placeholder(tf.float32, [None, IMG_SIZE, IMG_SIZE, 1])  # 128*128
+        y_ = tf.placeholder(tf.float32, [None, LABEL_CNT])  # right answer
 
-b_conv = bias_variable([32])
-h_conv = tf.nn.relu(conv2d(x, W_conv) + b_conv)
-h_pool = max_pool_2x2(h_conv)
+        # one
+        W_conv = weight_variable([5, 5, 1, 32])
 
-# two
-W_conv2 = weight_variable([5, 5, 32, 64])
-b_conv2 = bias_variable([64])
-h_conv2 = tf.nn.relu(conv2d(h_pool, W_conv2) + b_conv2)
-h_pool2 = max_pool_2x2(h_conv2)
+        b_conv = bias_variable([32])
+        h_conv = tf.nn.relu(conv2d(x, W_conv) + b_conv)
+        h_pool = max_pool_2x2(h_conv)
 
-# final 128/2/2 = 32
-W_fc = weight_variable([32*32*64, 1024])
-b_fc = bias_variable([1024])
+        # two
+        W_conv2 = weight_variable([5, 5, 32, 64])
+        b_conv2 = bias_variable([64])
+        h_conv2 = tf.nn.relu(conv2d(h_pool, W_conv2) + b_conv2)
+        h_pool2 = max_pool_2x2(h_conv2)
 
-h_pool2_flat = tf.reshape(h_pool2, [-1, 32*32*64])
-h_fc = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc) + b_fc)
+        # final 128/2/2 = 32
+        W_fc = weight_variable([32*32*64, 1024])
+        b_fc = bias_variable([1024])
 
-keep_prob = tf.placeholder(tf.float32)
-h_fc_drop = tf.nn.dropout(h_fc, keep_prob)
+        h_pool2_flat = tf.reshape(h_pool2, [-1, 32*32*64])
+        h_fc = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc) + b_fc)
 
-W_fc2 = weight_variable([1024, LABEL_CNT])
-b_fc2 = bias_variable([LABEL_CNT])
+        keep_prob = tf.placeholder(tf.float32)
+        h_fc_drop = tf.nn.dropout(h_fc, keep_prob)
 
-y = tf.matmul(h_fc_drop, W_fc2) + b_fc2
+        W_fc2 = weight_variable([1024, LABEL_CNT])
+        b_fc2 = bias_variable([LABEL_CNT])
 
-cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y, labels=y_))
+        y = tf.matmul(h_fc_drop, W_fc2) + b_fc2
 
-train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+        cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y, labels=y_))
 
-correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
-init = tf.global_variables_initializer()
+        correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
+        init = tf.global_variables_initializer()
+
+        self.x = x
+        self.y = y
+        self.y_ = y_
+        self.init = init
+        self.keep_prob = keep_prob
+        self.train_step = train_step
+        self.accuracy = accuracy
 
 
 

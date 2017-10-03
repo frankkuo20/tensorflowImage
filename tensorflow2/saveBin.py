@@ -78,6 +78,8 @@ def resize_img(img_path, shape):
 
     return im
 
+IMG_SIZE = 128  # 图像大小
+
 
 def save_as_tfrecord(samples, labels, bin_path):
     #  Save images and labels as TFRecord to file: `bin_path`
@@ -87,7 +89,7 @@ def save_as_tfrecord(samples, labels, bin_path):
     np.random.shuffle(img_label)
     for img, label in img_label:
         # 这里将图片的大小resize为128*128
-        im = resize_img(img, (128, 128))
+        im = resize_img(img, (IMG_SIZE, IMG_SIZE))
 
         im_raw = im.tobytes()
         example = tf.train.Example(features=tf.train.Features(feature={

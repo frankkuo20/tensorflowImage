@@ -1,6 +1,16 @@
-from tensorflow2.cnn import init, train_step, x, y_, keep_prob, accuracy
+# from tensorflow2.cnn import init, train_step, x, y_, keep_prob, accuracy
+from tensorflow2.cnn import CnnObj
 from tensorflow2.constants import input_pipeline
 import tensorflow as tf
+
+cnnObj = CnnObj()
+init = cnnObj.init
+x = cnnObj.x
+y_ = cnnObj.y_
+init = cnnObj.init
+keep_prob = cnnObj.keep_prob
+train_step = cnnObj.train_step
+accuracy = cnnObj.accuracy
 
 
 img_batch, label_batch = input_pipeline(["./binData/train.bin"], 50)

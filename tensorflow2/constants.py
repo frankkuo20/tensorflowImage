@@ -1,6 +1,9 @@
 import tensorflow as tf
 EMOTIONS = ["neutral", "disgust", "happy"]
 
+IMG_SIZE = 128
+LABEL_CNT = 3
+
 
 def read_and_decode(filename_queue):
     reader = tf.TFRecordReader()
@@ -12,7 +15,7 @@ def read_and_decode(filename_queue):
                                        })
 
     img = tf.decode_raw(features['img_raw'], tf.uint8)
-    img = tf.reshape(img, [128, 128, 1])  # old
+    img = tf.reshape(img, [IMG_SIZE, IMG_SIZE, 1])  # old
     # img = tf.reshape(img, [128*128])
     img = tf.cast(img, tf.float32) * (1. / 255) - 0.5  # normalize
     label = tf.cast(features['label'], tf.int32)
