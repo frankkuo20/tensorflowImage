@@ -7,7 +7,7 @@ cnnObj = CnnObj()
 x = cnnObj.x
 y_ = cnnObj.y_
 keep_prob = cnnObj.keep_prob
-
+accuracy = cnnObj.accuracy
 
 test_img_batch, test_label_batch = input_pipeline(["./binData/test.bin"], 200)
 
