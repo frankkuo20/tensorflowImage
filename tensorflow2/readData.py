@@ -9,14 +9,16 @@ from tensorflow2.constants import EMOTIONS
 
 import numpy as np
 
-cap = cv2.VideoCapture('./data/075/075_11.mp4')
+fileName = '075_22'
+
+cap = cv2.VideoCapture('./data/075/{}.mp4'.format(fileName))
 
 faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
 startTime = time.time()
 
 counter = 0
-csvFile = open('075_1.csv', 'w', newline='')
+csvFile = open('{}.csv'.format(fileName), 'w', newline='')
 csvFileWriter = csv.writer(csvFile)
 EMOTIONS.insert(0, 'second')
 csvFileWriter.writerows([EMOTIONS])
