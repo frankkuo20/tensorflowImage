@@ -3,8 +3,10 @@ import time
 
 import cv2
 import csv
+
+from tensorflow2.cnn import CnnObj
 from tensorflow2.constants import EMOTIONS
-from tensorflow2.cnn_getResult import getPredList
+
 import numpy as np
 
 cap = cv2.VideoCapture('./data/075/075_11.mp4')
@@ -45,7 +47,8 @@ while True:
             grayCut = gray[y:y + h, x:x + w]
             image = cv2.resize(grayCut, (128, 128))
 
-            predList = getPredList(image)
+            cnnObj = CnnObj()
+            predList = cnnObj.getPredList(image)
             predList = np.insert(predList, 0, 0.5*counter)
 
             csvFileWriter.writerows([predList])

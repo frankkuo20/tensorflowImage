@@ -2,10 +2,13 @@ import os
 
 import tensorflow as tf
 from tensorflow2.constants import EMOTIONS
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 IMG_SIZE = 128  # 图像大小
 LABEL_CNT = 3  # 标签类别的数量
+
+max_step = 200
 
 
 def weight_variable(shape):
@@ -27,7 +30,6 @@ def max_pool_2x2(x):
 
 class CnnObj:
     def __init__(self):
-
         x = tf.placeholder(tf.float32, [None, IMG_SIZE, IMG_SIZE, 1])  # 128*128
         y_ = tf.placeholder(tf.float32, [None, LABEL_CNT])  # right answer
 
@@ -45,10 +47,10 @@ class CnnObj:
         h_pool2 = max_pool_2x2(h_conv2)
 
         # final 128/2/2 = 32
-        W_fc = weight_variable([32*32*64, 1024])
+        W_fc = weight_variable([32 * 32 * 64, 1024])
         b_fc = bias_variable([1024])
 
-        h_pool2_flat = tf.reshape(h_pool2, [-1, 32*32*64])
+        h_pool2_flat = tf.reshape(h_pool2, [-1, 32 * 32 * 64])
         h_fc = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc) + b_fc)
 
         keep_prob = tf.placeholder(tf.float32)
@@ -76,6 +78,26 @@ class CnnObj:
         self.train_step = train_step
         self.accuracy = accuracy
 
+    def getPredList(self, image):
+        im_raw = image.tobytes()
+        img = tf.decode_raw(im_raw, tf.uint8)
+        img = tf.reshape(img, [IMG_SIZE, IMG_SIZE, 1])
+        image = tf.cast(img, tf.float32) * (1. / 255) - 0.5  # normalize
 
+        x = self.x
+        y = self.y
+        keep_prob = self.keep_prob
 
+        sess = tf.Session()
+        saver = tf.train.Saver()
+        tf.reset_default_graph()
 
+        saver.restore(sess, './cnn_train/graph.ckpt-{}'.format(max_step))
+        image = sess.run([image])
+        result = sess.run(y, feed_dict={x: image, keep_prob: 1.0})
+        return result
+
+    def getPredNum(self, image):
+        result = self.getPredList(image)
+        resultNum = result.argmax()
+        return resultNum
