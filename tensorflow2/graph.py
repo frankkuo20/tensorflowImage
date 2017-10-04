@@ -24,6 +24,9 @@ def readCsv(fileName):
 
 secondList, temp, temp2, temp3 = readCsv('075_11.csv')
 
+secondList, temp, temp2, temp3 = readCsv('075_22.csv')
+
+
 fig, (a1, a2) = plt.subplots(1, 2)
 a1.plot(secondList, temp, label='neutral', color='black')  # , 'bo-'
 a1.plot(secondList, temp2, label='disgust', color='blue')
@@ -32,7 +35,6 @@ a1.legend()
 a1.set_xlabel('Second')
 a2.set_title('happy')
 
-secondList, temp, temp2, temp3 = readCsv('075_22.csv')
 
 a2.plot(secondList, temp, label='neutral', color='black')  # , 'bo-'
 a2.plot(secondList, temp2, label='disgust', color='blue')
