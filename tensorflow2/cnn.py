@@ -1,7 +1,8 @@
 import os
 
 import tensorflow as tf
-from tensorflow2.constants import EMOTIONS
+import math
+
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -78,6 +79,11 @@ class CnnObj:
         self.train_step = train_step
         self.accuracy = accuracy
 
+        self.h_conv = h_conv
+        self.h_conv2 = h_conv2
+        self.W_conv = W_conv
+
+
     def getPredList(self, image):
         im_raw = image.tobytes()
         img = tf.decode_raw(im_raw, tf.uint8)
@@ -101,3 +107,28 @@ class CnnObj:
         result = self.getPredList(image)
         resultNum = result.argmax()
         return resultNum
+
+
+    # def plotNNFilter(self, units):
+    #     filters = units.shape[3]
+    #     plt.figure(1, figsize=(20, 20))
+    #     n_columns = 6
+    #     n_rows = math.ceil(filters / n_columns) + 1
+    #     for i in range(filters):
+    #         plt.subplot(n_rows, n_columns, i + 1)
+    #         plt.title('Filter ' + str(i))
+    #         plt.imshow(units[0, :, :, i], interpolation="nearest", cmap="gray")
+    #     plt.show()
+    #
+    # def getActivations(self, layer, stimuli):
+    #     x = self.x
+    #     units = sess.run(layer, feed_dict={x: stimuli, keep_prob: 1.0})
+    #     plotNNFilter(units)
+    #
+    #     imageToUse = test_imgs
+    #
+    # plt.imshow(np.reshape(imageToUse, [128, 128]), interpolation="nearest", cmap="gray")
+    # plt.show()
+    # getActivations(h_conv, imageToUse)
+    # getActivations(h_conv2, imageToUse)
+    # getActivations(W_conv, imageToUse)

@@ -3,19 +3,16 @@ import time
 from threading import Thread
 
 import cv2
-import csv
+import os
 
-from tensorflow2.cnn import CnnObj
-from tensorflow2.constants import EMOTIONS
-
-import numpy as np
-
-CSV_PATH = 'csv_data'
+SAVE_PATH = 'imageData'
 
 
-def write_csv(file_path, index):
-    file_name = file_path.split('\\')[-1][:-4]  # not include .mp4
-    csv_path = '{}/{}_{}.csv'.format(CSV_PATH, index, file_name)
+def write_image(file_path, file_name):
+    file_name2 = file_path.split('\\')[-1][:-4]  # not include .mp4
+    folder_name = '{}/{}_{}/'.format(SAVE_PATH, file_name, file_name2)
+    if not os.path.exists(folder_name):
+        os.mkdir(folder_name)
 
     cap = cv2.VideoCapture(file_path)
 
@@ -25,11 +22,6 @@ def write_csv(file_path, index):
 
     # new csv
     counter = 0
-    csv_file = open(csv_path, 'w', newline='')
-    csv_file_writer = csv.writer(csv_file)
-    head = EMOTIONS.copy()
-    head.insert(0, 'second')
-    csv_file_writer.writerows([head])
 
     while True:
         ret, frame = cap.read()
@@ -52,12 +44,9 @@ def write_csv(file_path, index):
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 grayCut = gray[y:y + h, x:x + w]
                 image = cv2.resize(grayCut, (128, 128))
-
-                cnnObj = CnnObj()
-                predList = cnnObj.getPredList(image)
-                predList = np.insert(predList, 0, 0.5 * counter)
-
-                csv_file_writer.writerows([predList])
+                cv2.imshow('frame', image)
+                image_path = '{}{}_{}_{}.jpg'.format(folder_name, file_name, file_name2, counter)
+                cv2.imwrite(image_path, image)
 
             startTime = time.time()
 
@@ -65,30 +54,52 @@ def write_csv(file_path, index):
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-    csv_file.close()
-
     cap.release()
     cv2.destroyAllWindows()
 
 
-def write_csv_thread(file_paths, num):
+def write_img_thread(file_paths, num):
     for index, file_path in enumerate(file_paths):
+        folderName = file_path.split('\\')[-3]
+        file_name = None
         show_num = num + index
+        if folderName == '老師專題':
+            file_name = 'A'
+        elif folderName == '資管一A':
+            file_name = 'B'
+        elif folderName == '資管二C':
+            file_name = 'C'
         print('{}, start...{}'.format(show_num, file_path))
-        write_csv(file_path, show_num)
+        write_image(file_path, file_name)
         print('{}, finish...{}'.format(show_num, file_path))
+
+
+def get_fileNma(folderName):
+    if folderName == '老師專題':
+        file_name = 'A'
+    elif folderName == '資管一A':
+        file_name = 'B'
+    elif folderName == '資管二C':
+        file_name = 'C'
+    return file_name
 
 
 if __name__ == '__main__':
     file_paths = glob.glob('./origin_data/*/*/*')
 
+    # write_img_thread(file_paths, 0)
+
+    total = 180
     split_num = 30
     aa = int(len(file_paths) / split_num)
 
     for i in range(aa):
         start_num = i * split_num
         end_num = (i + 1) * split_num
+
         file_paths_split = file_paths[start_num:end_num]
-        Thread(target=write_csv_thread, args=(file_paths_split, start_num)).start()
+        Thread(target=write_img_thread, args=(file_paths_split, start_num)).start()
 
     print('All finish. num: {}'.format(len(file_paths)))
+
+

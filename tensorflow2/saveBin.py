@@ -29,7 +29,6 @@ for emotion in EMOTIONS:
     totalFiles.append(filenames)
     totalNum += len(filenames)
 
-
 TRAIN_SEC, TEST_SEC = 0.8, 0.2
 
 totalFilesTrain = []
